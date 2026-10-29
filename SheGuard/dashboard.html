@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="dashboard">
+<!-- dashboard.html: live summary; every figure is read from Firestore. Protected page — js/guard.js redirects signed-out visitors to login.html. -->
+<button class="btn secondary menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar"></aside>
+  <main class="content" id="content" tabindex="-1">
+    <h1 id="greeting">Hello</h1>
+    <div id="status" aria-live="polite"></div><div id="maps-warning"></div>
+    <section class="grid cols-4" aria-label="Your numbers">
+      <div class="card stat"><b id="stat-reports">…</b><span>Reports saved</span></div>
+      <div class="card stat"><b id="stat-open">…</b><span>Not yet closed</span></div>
+      <div class="card stat"><b id="stat-contacts">…</b><span>Trusted contacts</span></div>
+      <div class="card stat"><b id="stat-journeys">…</b><span>Recent journeys</span></div>
+    </section>
+    <section class="grid cols-2" style="margin-top:1rem">
+      <article class="card"><h2>Recent reports</h2><div id="recent-reports"></div></article>
+      <article class="card"><h2>Recent SOS alerts</h2><div id="recent-alerts"></div></article>
+    </section>
+    <section class="card" style="margin-top:1rem"><h2>Safety data sources</h2><div id="data-sources"></div></section>
+    <p class="row" style="margin-top:1rem"><a class="btn" href="safe-routes.html">Plan a route</a><a class="btn secondary" href="report-incident.html">Report an incident</a><a class="btn danger" href="emergency-services.html">Emergency help</a></p>
+  </main>
+</div>
+<script type="module" src="js/pages/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,642 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safe Routes — SheGuard</title>
+
+<link rel="stylesheet"
+ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #1b2935;
+}
+
+header {
+  background: #14212c;
+  color: white;
+  padding: 18px 24px;
+  border-bottom: 3px solid #f5b82e;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+header h1 {
+  font-size: 21px;
+  margin: 0;
+}
+
+header a {
+  color: white;
+  text-decoration: none;
+  border: 1px solid #71818c;
+  padding: 9px 12px;
+  border-radius: 5px;
+  font-size: 13px;
+}
+
+main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 24px 18px;
+}
+
+h2 { margin-top: 0; }
+
+.intro {
+  color: #61717e;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.card {
+  background: white;
+  border: 1px solid #dce2e7;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 7px;
+}
+
+input, select {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cbd4db;
+  border-radius: 5px;
+  margin-bottom: 14px;
+  background: white;
+  font-size: 14px;
+}
+
+button {
+  border: 0;
+  border-radius: 5px;
+  background: #142c3b;
+  color: white;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover { background: #24516a; }
+
+button.secondary {
+  color: #1b2935;
+  background: #edf1f4;
+  border: 1px solid #cbd4db;
+}
+
+button.gold {
+  background: #f5b82e;
+  color: #17232d;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+#map {
+  width: 100%;
+  height: 530px;
+  border-radius: 8px;
+  border: 1px solid #dce2e7;
+  background: #e5edf1;
+}
+
+.result {
+  background: #f5f8fa;
+  border: 1px solid #dce4e9;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.result strong { color: #1769aa; }
+
+#nearbyResults {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.place {
+  border-bottom: 1px solid #e0e6ea;
+  padding: 11px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.place:last-child { border-bottom: 0; }
+
+.place a {
+  color: #1769aa;
+  text-decoration: none;
+}
+
+.hint {
+  color: #687985;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.notice {
+  background: #fff5dc;
+  border-left: 4px solid #e8ad20;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+#status {
+  font-size: 13px;
+  color: #526673;
+  line-height: 1.5;
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; }
+  #map { height: 420px; }
+  main { padding: 18px 12px; }
+  header { padding: 15px; }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1>🟡 SheGuard — Safe Routes</h1>
+  <a href="dashboard.html">← Dashboard</a>
+</header>
+
+<main>
+  <h2>Find a safer route</h2>
+  <p class="intro">
+    Plan your journey and look for nearby police stations,
+    hospitals, pharmacies and shelters.
+  </p>
+
+  <div class="notice">
+    This tool does not contact police or guarantee route safety.
+    If you are in immediate danger in India, call <strong>112</strong>.
+  </div>
+
+  <div class="layout">
+    <div>
+      <section class="card">
+        <label for="start">Starting location</label>
+        <input id="start" placeholder="Enter starting place">
+
+        <label for="destination">Destination</label>
+        <input id="destination" placeholder="Enter destination">
+
+        <label for="mode">Travel mode</label>
+        <select id="mode">
+          <option value="driving">Driving</option>
+          <option value="walking">Walking</option>
+        </select>
+
+        <div class="actions">
+          <button class="gold" id="routeBtn">Find route</button>
+          <button class="secondary" id="locationBtn">Use my location</button>
+        </div>
+
+        <div id="status" role="status" aria-live="polite">
+          Enter your starting location and destination.
+        </div>
+
+        <div class="result">
+          <div>Distance: <strong id="distance">—</strong></div>
+          <div>Estimated travel time: <strong id="duration">—</strong></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Nearby emergency services</h3>
+        <p class="hint">
+          Use your location or enter a starting place before searching.
+        </p>
+
+        <label for="radius">Search radius</label>
+        <select id="radius">
+          <option value="2000">2 km</option>
+          <option value="5000" selected>5 km</option>
+          <option value="10000">10 km</option>
+        </select>
+
+        <div class="actions">
+          <button id="nearbyBtn">Find nearby help</button>
+          <button class="secondary" id="clearBtn">Clear map</button>
+        </div>
+
+        <div id="nearbyResults" class="hint">
+          No services searched yet.
+        </div>
+      </section>
+
+      <section class="card">
+        <h3>Trusted contacts</h3>
+        <p class="hint">
+          Contact locations are not shown unless your app implements
+          consent-based location sharing.
+        </p>
+        <div class="actions">
+          <a href="trusted-contacts.html">
+            <button type="button" class="secondary">Manage contacts</button>
+          </a>
+          <a href="tel:112">
+            <button type="button">Call 112</button>
+          </a>
+        </div>
+      </section>
+    </div>
+
+    <div>
+      <div id="map"></div>
+      <p class="hint">
+        Map © OpenStreetMap contributors. Route estimates and nearby
+        listings depend on public data and may be incomplete.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const $ = id => document.getElementById(id);
+
+const map = L.map("map").setView([20.5937, 78.9629], 5);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom: 19,
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+let currentLocation = null;
+let startMarker = null;
+let destinationMarker = null;
+let routeLayer = null;
+let serviceMarkers = [];
+
+function setStatus(message) {
+  $("status").textContent = message;
+}
+
+async function geocode(place) {
+  const response = await fetch(
+    "https://nominatim.openstreetmap.org/search?" +
+    new URLSearchParams({
+      q: place,
+      format: "jsonv2",
+      limit: "1"
+    })
+  );
+
+  if (!response.ok) throw new Error("Location search is unavailable.");
+
+  const data = await response.json();
+
+  if (!data.length) {
+    throw new Error("Location not found. Try a more specific address or landmark.");
+  }
+
+  return {
+    lat: Number(data[0].lat),
+    lng: Number(data[0].lon),
+    label: data[0].display_name
+  };
+}
+
+function addMarker(point, label, oldMarker) {
+  if (oldMarker) map.removeLayer(oldMarker);
+
+  return L.marker([point.lat, point.lng])
+    .addTo(map)
+    .bindPopup(label);
+}
+
+$("locationBtn").addEventListener("click", () => {
+  if (!navigator.geolocation) {
+    setStatus("Your browser does not support location services.");
+    return;
+  }
+
+  setStatus("Requesting location permission…");
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      currentLocation = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+        label: "My current location"
+      };
+
+      $("start").value = currentLocation.label;
+      startMarker = addMarker(
+        currentLocation,
+        "Your current location",
+        startMarker
+      );
+
+      map.setView(
+        [currentLocation.lat, currentLocation.lng],
+        14
+      );
+
+      setStatus("Location detected. You can now find a route or nearby help.");
+    },
+    error => {
+      const messages = {
+        1: "Location permission was denied. Enter your starting area manually.",
+        2: "Your location is unavailable. Try again or enter an area manually.",
+        3: "Location request timed out. Please try again."
+      };
+
+      setStatus(messages[error.code] || "Could not get your location.");
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+  );
+});
+
+$("routeBtn").addEventListener("click", async () => {
+  const startText = $("start").value.trim();
+  const destinationText = $("destination").value.trim();
+
+  if (!startText || !destinationText) {
+    setStatus("Enter both a starting location and destination.");
+    return;
+  }
+
+  $("routeBtn").disabled = true;
+
+  try {
+    setStatus("Finding both locations…");
+
+    const start = currentLocation && (
+      startText === "My current location" ||
+      startText === currentLocation.label
+    ) ? currentLocation : await geocode(startText);
+
+    const destination = await geocode(destinationText);
+
+    startMarker = addMarker(start, "Starting location", startMarker);
+    destinationMarker = addMarker(
+      destination,
+      "Destination",
+      destinationMarker
+    );
+
+    if ($("mode").value === "walking") {
+      throw new Error(
+        "Walking directions are not available from the configured public routing service. Select Driving for a route."
+      );
+    }
+
+    setStatus("Calculating route…");
+
+    const url =
+      "https://router.project-osrm.org/route/v1/driving/" +
+      `${start.lng},${start.lat};${destination.lng},${destination.lat}` +
+      "?overview=full&geometries=geojson";
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Routing service is unavailable.");
+
+    const data = await response.json();
+
+    if (data.code !== "Ok" || !data.routes.length) {
+      throw new Error("No route found between these locations.");
+    }
+
+    const route = data.routes[0];
+
+    if (routeLayer) map.removeLayer(routeLayer);
+
+    routeLayer = L.geoJSON(route.geometry, {
+      style: { color: "#1769aa", weight: 5, opacity: 0.9 }
+    }).addTo(map);
+
+    map.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+
+    $("distance").textContent =
+      (route.distance / 1000).toFixed(1) + " km";
+
+    const minutes = Math.round(route.duration / 60);
+    $("duration").textContent = minutes >= 60
+      ? Math.floor(minutes / 60) + " hr " + minutes % 60 + " min"
+      : minutes + " min";
+
+    setStatus(
+      "Route found. This is a distance and time estimate, not a safety guarantee."
+    );
+  } catch (error) {
+    setStatus(error.message || "Could not calculate route.");
+  } finally {
+    $("routeBtn").disabled = false;
+  }
+});
+
+function getServiceType(tags) {
+  if (tags.amenity === "police") return "Police station";
+  if (tags.amenity === "hospital") return "Hospital";
+  if (tags.amenity === "clinic" || tags.amenity === "doctors") return "Clinic";
+  if (tags.amenity === "pharmacy") return "Pharmacy";
+  if (tags.amenity === "shelter" ||
+      tags.social_facility === "shelter") return "Shelter";
+  return null;
+}
+
+$("nearbyBtn").addEventListener("click", async () => {
+  $("nearbyBtn").disabled = true;
+
+  try {
+    let origin = currentLocation;
+
+    if (!origin) {
+      const startText = $("start").value.trim();
+
+      if (!startText) {
+        throw new Error("Enter a starting area or use your current location first.");
+      }
+
+      origin = await geocode(startText);
+    }
+
+    setStatus("Searching nearby services…");
+
+    const radius = Number($("radius").value);
+
+    const query = `
+      [out:json][timeout:25];
+      (
+        nwr["amenity"="police"](around:${radius},${origin.lat},${origin.lng});
+        nwr["amenity"~"hospital|clinic|doctors|pharmacy"](around:${radius},${origin.lat},${origin.lng});
+        nwr["amenity"="shelter"](around:${radius},${origin.lat},${origin.lng});
+        nwr["social_facility"="shelter"](around:${radius},${origin.lat},${origin.lng});
+      );
+      out center tags;
+    `;
+
+    let response = await fetch(
+      "https://overpass-api.de/api/interpreter",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "data=" + encodeURIComponent(query)
+      }
+    );
+
+    if (!response.ok) {
+      response = await fetch(
+        "https://overpass.kumi.systems/api/interpreter",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: "data=" + encodeURIComponent(query)
+        }
+      );
+    }
+
+    if (!response.ok) throw new Error("Nearby service search is temporarily unavailable.");
+
+    const data = await response.json();
+    const results = $("nearbyResults");
+    results.replaceChildren();
+
+    serviceMarkers.forEach(marker => map.removeLayer(marker));
+    serviceMarkers = [];
+
+    const found = [];
+    const seen = new Set();
+
+    for (const item of data.elements || []) {
+      const lat = item.lat ?? item.center?.lat;
+      const lng = item.lon ?? item.center?.lon;
+      if (lat == null || lng == null) continue;
+
+      const type = getServiceType(item.tags || {});
+      if (!type) continue;
+
+      const key = type + ":" + lat.toFixed(5) + ":" + lng.toFixed(5);
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      const dLat = (lat - origin.lat) * Math.PI / 180;
+      const dLng = (lng - origin.lng) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(origin.lat * Math.PI / 180) *
+        Math.cos(lat * Math.PI / 180) *
+        Math.sin(dLng / 2) ** 2;
+
+      found.push({
+        lat, lng, type,
+        name: item.tags?.name || type,
+        distance: 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      });
+    }
+
+    found.sort((a, b) => a.distance - b.distance);
+
+    if (!found.length) {
+      results.textContent = "No matching services were found in the mapped data for this area.";
+    } else {
+      found.forEach(place => {
+        const row = document.createElement("div");
+        row.className = "place";
+
+        const name = document.createElement("strong");
+        name.textContent = place.name;
+
+        const detail = document.createElement("div");
+        detail.textContent =
+          place.type + " · " + place.distance.toFixed(1) + " km away";
+
+        const link = document.createElement("a");
+        link.href =
+          `https://www.openstreetmap.org/?mlat=${place.lat}&mlon=${place.lng}#map=17/${place.lat}/${place.lng}`;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "View on map";
+
+        row.append(name, detail, link);
+        results.appendChild(row);
+
+        const marker = L.marker([place.lat, place.lng])
+          .addTo(map)
+          .bindPopup(
+            place.name + "<br>" + place.type + " · " +
+            place.distance.toFixed(1) + " km"
+          );
+
+        serviceMarkers.push(marker);
+      });
+
+      const bounds = L.latLngBounds([[origin.lat, origin.lng]]);
+      found.forEach(place => bounds.extend([place.lat, place.lng]));
+      map.fitBounds(bounds.pad(0.15), { maxZoom: 14 });
+    }
+
+    setStatus(
+      found.length + " mapped service(s) found. Verify details before travelling."
+    );
+  } catch (error) {
+    setStatus(error.message || "Could not search nearby services.");
+  } finally {
+    $("nearbyBtn").disabled = false;
+  }
+});
+
+$("clearBtn").addEventListener("click", () => {
+  if (routeLayer) map.removeLayer(routeLayer);
+  routeLayer = null;
+
+  if (startMarker) map.removeLayer(startMarker);
+  if (destinationMarker) map.removeLayer(destinationMarker);
+
+  startMarker = null;
+  destinationMarker = null;
+
+  serviceMarkers.forEach(marker => map.removeLayer(marker));
+  serviceMarkers = [];
+
+  $("distance").textContent = "—";
+  $("duration").textContent = "—";
+  $("nearbyResults").textContent = "No services searched yet.";
+
+  setStatus("Map cleared. Enter a starting location to begin again.");
+});
+</script>
+</body>
+</html>

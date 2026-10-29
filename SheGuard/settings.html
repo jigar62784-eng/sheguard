@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="settings">
+<!-- settings.html: profile, privacy and account controls. Protected page — js/guard.js redirects signed-out visitors to login.html. -->
+<button class="btn secondary menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar"></aside>
+  <main class="content" id="content" tabindex="-1">
+    <h1>Settings</h1>
+    <div id="msg" aria-live="polite"></div>
+    <form id="profile-form" class="card" style="max-width:640px" novalidate>
+      <h2>Profile and privacy</h2>
+      <div class="field"><label for="name">Name</label><input id="name"></div>
+      <div class="field"><label for="email">Email</label><input id="email" disabled></div>
+      <div class="field"><label for="phone">Phone</label><input id="phone" type="tel"></div>
+      <div class="field"><label class="check"><input id="analytics" type="checkbox"> Allow anonymous usage analytics (Firebase Analytics)</label></div>
+      <div class="field"><label class="check"><input id="loc-default" type="checkbox"> I usually want to include my location in SOS alerts</label><p class="hint">This is only a preference. You are asked again every time you send an alert.</p></div>
+      <button class="btn" type="submit">Save settings</button>
+    </form>
+    <form id="password-form" class="card" style="max-width:640px;margin-top:1rem" novalidate>
+      <h2>Change password</h2><div id="pw-msg" aria-live="polite"></div>
+      <div class="field"><label for="new-password">New password</label><input id="new-password" type="password" autocomplete="new-password" minlength="8"></div>
+      <button class="btn secondary" type="submit">Change password</button>
+      <p class="hint">If Firebase asks you to log in again first, log out and back in, then retry.</p>
+    </form>
+    <section class="card" style="max-width:640px;margin-top:1rem"><h2>Delete account</h2>
+      <p>Removes your profile, contacts, journeys, SOS alerts and the private links to your reports. Report content already saved stays without any link to you.</p>
+      <button class="btn danger" id="delete-btn" type="button">Delete my account and data</button></section>
+  </main>
+</div>
+<script type="module" src="js/pages/settings.js"></script>
+</body>
+</html>

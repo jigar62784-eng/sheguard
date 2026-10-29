@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emergency services — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="emergency-services">
+<!-- emergency-services.html: official numbers, nearby services, SOS. Protected page — js/guard.js redirects signed-out visitors to login.html. -->
+<button class="btn secondary menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar"></aside>
+  <main class="content" id="content" tabindex="-1">
+    <h1>Emergency services</h1>
+    <div class="notice bad" role="note"><b>In danger? Call <a href="tel:112">112</a> now.</b> The tools below are supplementary.</div>
+    <section class="card"><h2>Official helpline numbers</h2><div id="official"></div></section>
+    <section class="card" style="margin-top:1rem"><h2>Nearby police stations, hospitals and fire stations</h2>
+      <div class="row"><div style="flex:1;min-width:240px" id="area-ac"></div><button class="btn secondary" id="use-location" type="button">Use my location</button></div>
+      <div id="nearby-msg" aria-live="polite" style="margin-top:.75rem"></div><div id="nearby"></div></section>
+    <section class="card" style="margin-top:1rem"><h2>SOS to trusted contacts</h2>
+      <p class="small muted">Sends a message through the SheGuard backend to contacts who agreed to receive alerts. Status is shown per contact; “delivered” appears only when the provider confirms it.</p>
+      <div id="sos-contacts"></div>
+      <label class="check" style="margin:.75rem 0"><input type="checkbox" id="share-loc"> Include my current location (browser will ask permission)</label>
+      <button class="btn danger" id="sos-send" type="button">Send SOS alert</button>
+      <div id="sos-msg" aria-live="assertive" style="margin-top:.75rem"></div><div id="sos-result"></div></section>
+  </main>
+</div>
+<script type="module" src="js/pages/emergency-services.js"></script>
+</body>
+</html>

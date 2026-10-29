@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin review — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="admin-dashboard">
+<!-- admin-dashboard.html: authorised report review and data monitoring. Protected page — js/guard.js redirects signed-out visitors to login.html. -->
+<button class="btn secondary menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar"></aside>
+  <main class="content" id="content" tabindex="-1">
+    <h1>Admin review</h1>
+    <p class="muted">Reviewer access is granted by the <code>admin</code> custom claim (see README), not by any field in the browser.</p>
+    <div id="msg" aria-live="polite"></div>
+    <section class="grid cols-4" id="counts"></section>
+    <section class="card" style="margin-top:1rem"><h2>Reports</h2><div id="reports"></div></section>
+    <section class="card" style="margin-top:1rem"><div class="row spread"><h2>Safety data sources</h2><button class="btn secondary small" id="register-sources" type="button">Register/refresh sources</button></div><div id="sources"></div></section>
+    <section class="card" style="margin-top:1rem"><h2>Audit log</h2><div id="audit"></div></section>
+  </main>
+</div>
+<script type="module" src="js/pages/admin-dashboard.js"></script>
+</body>
+</html>

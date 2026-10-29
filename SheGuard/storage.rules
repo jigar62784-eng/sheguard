@@ -1,0 +1,27 @@
+// =============================================================================
+// storage.rules — private evidence files.
+// Path: evidence/{reportReference}/{file}. The reporter is found via Firestore
+// (reportOwners/{reference}.uid), so the path itself contains no account id and
+// anonymous reports stay anonymous to reviewers.
+// Deploy: firebase deploy --only storage
+// (Cross-service rules need Firebase to grant the storage service agent access to Firestore;
+//  the console offers this automatically the first time you deploy.)
+// =============================================================================
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() { return request.auth != null; }
+    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
+    function ownerPath(ref) { return /databases/(default)/documents/reportOwners/$(ref); }
+    function isReporter(ref) { return signedIn() && firestore.exists(ownerPath(ref)) && firestore.get(ownerPath(ref)).data.uid == request.auth.uid; }
+
+    match /evidence/{ref}/{file} {
+      allow read: if isAdmin() || isReporter(ref);
+      allow create: if isReporter(ref)
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/(jpeg|png|webp)|application/pdf|video/mp4');
+      allow update, delete: if false;   // evidence is immutable once uploaded
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

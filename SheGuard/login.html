@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="login">
+<!-- login.html: public page. Authentication is performed by Firebase Auth (js/auth.js). -->
+<main class="auth-wrap"><div class="card auth-card">
+  <a class="brand" href="index.html" style="color:var(--ink)"><span class="brand-mark" aria-hidden="true"></span>SheGuard</a>
+  <h1>Log in</h1>
+  <div id="msg" aria-live="polite"></div>
+  <form id="login-form" novalidate>
+    <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required></div>
+    <div class="field"><label class="check"><input id="remember" type="checkbox" checked> Keep me signed in on this device</label></div>
+    <button class="btn" id="submit" type="submit" style="width:100%">Log in</button>
+  </form>
+  <p class="row spread small" style="margin-top:1rem"><button class="btn secondary small" id="forgot" type="button">Forgot password</button><a href="register.html">Create account</a></p>
+  <hr style="border:0;border-top:1px solid var(--line);margin:1rem 0">
+  <button class="btn secondary" id="google" type="button" style="width:100%">Continue with Google</button>
+</div></main>
+<script type="module" src="js/pages/auth-pages.js"></script>
+</body>
+</html>

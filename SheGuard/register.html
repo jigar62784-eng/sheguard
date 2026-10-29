@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Create your account — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="register">
+<!-- register.html: public page. Authentication is performed by Firebase Auth (js/auth.js). -->
+<main class="auth-wrap"><div class="card auth-card">
+  <a class="brand" href="index.html" style="color:var(--ink)"><span class="brand-mark" aria-hidden="true"></span>SheGuard</a>
+  <h1>Create your account</h1>
+  <div id="msg" aria-live="polite"></div>
+  <form id="register-form" novalidate>
+    <div class="field"><label for="name">Name</label><input id="name" autocomplete="name" required></div>
+    <div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="phone">Phone (optional)</label><input id="phone" type="tel" autocomplete="tel" placeholder="+919876543210"></div>
+    <div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="new-password" minlength="8" required><p class="hint">At least 8 characters.</p></div>
+    <div class="field"><label for="confirm">Confirm password</label><input id="confirm" type="password" autocomplete="new-password" required></div>
+    <button class="btn" id="submit" type="submit" style="width:100%">Create account</button>
+  </form>
+  <p class="small" style="margin-top:1rem">Already registered? <a href="login.html">Log in</a></p>
+  <hr style="border:0;border-top:1px solid var(--line);margin:1rem 0">
+  <button class="btn secondary" id="google" type="button" style="width:100%">Continue with Google</button>
+</div></main>
+<script type="module" src="js/pages/auth-pages.js"></script>
+</body>
+</html>

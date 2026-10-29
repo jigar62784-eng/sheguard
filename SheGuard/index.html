@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan routes, report incidents, reach help — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="index">
+<!-- index.html: public landing page. No Firebase calls are made here. -->
+<header class="hero">
+  <div class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>SheGuard</a>
+    <nav class="row" aria-label="Account"><a class="btn secondary small" style="color:#fff;border-color:#6d7d8a" href="login.html">Log in</a><a class="btn lamp small" href="register.html">Create account</a></nav>
+  </div>
+  <div class="hero-inner">
+    <div>
+      <h1>Compare routes with the facts in front of you.</h1>
+      <p>SheGuard shows real walking, cycling and driving routes, nearby police stations and hospitals, and any official public-safety records available for the area. You choose the route.</p>
+      <p class="row"><a class="btn lamp" href="register.html">Create a free account</a><a class="btn secondary" style="color:#fff;border-color:#6d7d8a" href="login.html">I already have one</a></p>
+    </div>
+    <aside class="honesty" aria-labelledby="honest-h">
+      <h2 id="honest-h">What SheGuard will and won’t tell you</h2>
+      <ul>
+        <li>It will show distance, time and alternatives from Google’s routing data.</li>
+        <li>It will show recorded safety data only when an official source supplies it, with the source, date and coverage next to it.</li>
+        <li>It will say “Insufficient safety data” instead of inventing a score.</li>
+        <li>It never calls a route guaranteed safe. No record of incidents does not mean no risk.</li>
+        <li>A report saved here is not a police complaint unless an agency integration says otherwise.</li>
+      </ul>
+    </aside>
+  </div>
+</header>
+<section class="section" aria-labelledby="f-h">
+  <h2 id="f-h">What you can do</h2>
+  <div class="grid cols-2">
+    <article class="card"><h3>Safe routes</h3><p>Compare alternative routes, see nearby services, and open your pick in Google Maps.</p></article>
+    <article class="card"><h3>Report an incident</h3><p>Save a private report with optional evidence and track its status.</p></article>
+    <article class="card"><h3>Emergency services</h3><p>Official helpline numbers, nearby stations and hospitals, and an SOS to contacts who agreed to receive it.</p></article>
+    <article class="card"><h3>Your data, your control</h3><p>Location is shared only when you tick the box. You can delete your account data in Settings.</p></article>
+  </div>
+  <p class="notice warn" style="margin-top:1.5rem"><b>In an emergency call 112.</b> SheGuard is a planning and reporting aid, not an emergency service.</p>
+</section>
+</body>
+</html>

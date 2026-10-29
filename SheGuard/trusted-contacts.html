@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trusted contacts — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="trusted-contacts">
+<!-- trusted-contacts.html: manage trusted contacts. Protected page — js/guard.js redirects signed-out visitors to login.html. -->
+<button class="btn secondary menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar"></aside>
+  <main class="content" id="content" tabindex="-1">
+    <h1>Trusted contacts</h1>
+    <div id="msg" aria-live="polite"></div>
+    <form id="contact-form" class="card" style="max-width:640px" novalidate>
+      <div class="field"><label for="name">Name</label><input id="name" required></div>
+      <div class="field"><label for="phone">Phone (international format)</label><input id="phone" type="tel" placeholder="+919876543210" required></div>
+      <div class="field"><label for="email">Email (optional)</label><input id="email" type="email"></div>
+      <div class="field"><label for="relationship">Relationship (optional)</label><input id="relationship"></div>
+      <div class="field"><label class="check"><input id="consent" type="checkbox"> This person has agreed to receive my SOS alerts</label><p class="hint">Alerts are only sent to contacts with this box ticked.</p></div>
+      <button class="btn" id="submit" type="submit">Add contact</button>
+    </form>
+    <h2 style="margin-top:1.5rem">Your contacts</h2><div id="list"></div>
+  </main>
+</div>
+<script type="module" src="js/pages/trusted-contacts.js"></script>
+</body>
+</html>

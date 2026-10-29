@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report an incident — SheGuard</title>
+<meta name="description" content="SheGuard — route comparison, incident reporting and emergency tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="report-incident">
+<!-- report-incident.html: incident submission → Firestore + Cloud Storage. Protected page — js/guard.js redirects signed-out visitors to login.html. -->
+<button class="btn secondary menu-btn" id="menu-btn" aria-expanded="false" aria-controls="sidebar">Menu</button>
+<div class="app">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar"></aside>
+  <main class="content" id="content" tabindex="-1">
+    <h1>Report an incident</h1>
+    <div class="notice warn">Saving a report here does <b>not</b> notify the police. In an emergency call <a href="tel:112">112</a>.</div>
+    <div id="msg" aria-live="polite"></div>
+    <form id="report-form" class="card" style="max-width:720px" novalidate>
+      <div class="field"><label for="category">Category</label><select id="category" required>
+        <option>Harassment</option><option>Stalking</option><option>Assault</option><option>Theft or robbery</option><option>Unsafe area (lighting, crowd, access)</option><option>Online abuse</option><option>Other</option></select></div>
+      <div class="field"><label for="when">Date and time</label><input id="when" type="datetime-local" required></div>
+      <div class="field"><label>General location</label><div id="location-ac"></div><input id="location-text" placeholder="Area or landmark, e.g. Sector 62 metro station"><p class="hint">Give a general area, not an exact spot. Coordinates are rounded to about 1 km before saving.</p></div>
+      <div class="field"><label for="description">Description (optional)</label><textarea id="description" maxlength="2000"></textarea></div>
+      <div class="field"><label for="evidence">Evidence (optional)</label><input id="evidence" type="file" multiple accept="image/jpeg,image/png,image/webp,application/pdf,video/mp4"><p class="hint">Up to 3 files, 10 MB each. Stored privately; only you and reviewers can open them.</p></div>
+      <div class="field"><label class="check"><input id="anonymous" type="checkbox"> Hide my identity from SheGuard reviewers</label><p class="hint">Your account is linked to the report in a separate private record that reviewers cannot read when this is ticked. You can still see the report in My reports.</p></div>
+      <button class="btn" id="submit" type="submit">Save report</button>
+    </form>
+  </main>
+</div>
+<script type="module" src="js/pages/report-incident.js"></script>
+</body>
+</html>

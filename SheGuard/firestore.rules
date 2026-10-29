@@ -1,0 +1,142 @@
+// =============================================================================
+// firestore.rules — server-side authorization for SheGuard.
+// The UI hiding a button is NOT security; these rules are. Deploy with:
+//   firebase deploy --only firestore:rules,firestore:indexes
+//
+// Admin access = custom claim `admin: true` set on the user's token by the Java
+// backend tool (AdminClaimTool). It can never be set from the browser.
+// =============================================================================
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+    function signedIn() { return request.auth != null; }
+    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
+    function isAdmin() { return signedIn() && request.auth.token.admin == true; }
+    function shortStr(v, max) { return v is string && v.size() <= max; }
+    function ownerDocPath(ref) { return /databases/$(database)/documents/reportOwners/$(ref); }
+
+    // ---------- users/{uid}: profile + privacy flags ----------
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['displayName','email','phone','privacy','createdAt'])
+        && shortStr(request.resource.data.displayName, 100)
+        && shortStr(request.resource.data.email, 254)
+        && shortStr(request.resource.data.phone, 20)
+        && request.resource.data.privacy.keys().hasOnly(['analytics','locationSharingDefault'])
+        && request.resource.data.privacy.analytics is bool
+        && request.resource.data.privacy.locationSharingDefault is bool
+        && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','phone','privacy'])
+        && shortStr(request.resource.data.displayName, 100)
+        && shortStr(request.resource.data.phone, 20)
+        && request.resource.data.privacy.keys().hasOnly(['analytics','locationSharingDefault'])
+        && request.resource.data.privacy.analytics is bool
+        && request.resource.data.privacy.locationSharingDefault is bool;
+      allow delete: if isOwner(uid);
+
+      // Trusted contacts: owner only.
+      match /contacts/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['name','phone','email','relationship','consent','createdAt'])
+          && shortStr(request.resource.data.name, 100)
+          && request.resource.data.phone is string
+          && request.resource.data.phone.matches('^\\+[1-9][0-9]{7,14}$')
+          && shortStr(request.resource.data.email, 254)
+          && shortStr(request.resource.data.relationship, 60)
+          && request.resource.data.consent is bool;
+      }
+
+      // Journey records: owner only.
+      match /journeys/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['originLabel','destinationLabel','mode','distanceMeters','durationSec','routeIndex','status','createdAt'])
+          && request.resource.data.mode in ['walking','driving','cycling'];
+      }
+
+      // SOS alerts: the owner creates the REQUEST; delivery fields (status, deliveries, ...)
+      // are written only by the backend through the Admin SDK, which bypasses these rules.
+      match /alerts/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && request.resource.data.keys().hasOnly(['status','locationShared','location','contactIds','createdAt'])
+          && request.resource.data.status == 'requested'
+          && request.resource.data.locationShared is bool
+          && request.resource.data.contactIds is list && request.resource.data.contactIds.size() <= 10
+          && request.resource.data.createdAt == request.time;
+        allow update: if false;
+      }
+    }
+
+    // ---------- reportOwners/{ref}: private link report -> account ----------
+    match /reportOwners/{ref} {
+      // Owner reads own links; reviewers may read a link ONLY when the reporter did not choose anonymity.
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || (isAdmin() && resource.data.anonymous == false));
+      allow create: if isOwner(request.resource.data.uid)
+        && request.resource.data.keys().hasOnly(['uid','anonymous','reference','createdAt'])
+        && request.resource.data.reference == ref
+        && request.resource.data.anonymous is bool
+        && request.resource.data.createdAt == request.time;
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ---------- reports/{ref}: incident content (contains no user id) ----------
+    match /reports/{ref} {
+      allow get: if isAdmin()
+        || (signedIn() && exists(ownerDocPath(ref)) && get(ownerDocPath(ref)).data.uid == request.auth.uid);
+      allow list: if isAdmin();
+
+      allow create: if signedIn()
+        && existsAfter(ownerDocPath(ref))
+        && getAfter(ownerDocPath(ref)).data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['reference','category','occurredAt','generalLocation','description','evidence','anonymous','status','agency','createdAt'])
+        && request.resource.data.reference == ref
+        && request.resource.data.category in ['Harassment','Stalking','Assault','Theft or robbery','Unsafe area (lighting, crowd, access)','Online abuse','Other']
+        && request.resource.data.occurredAt is timestamp && request.resource.data.occurredAt <= request.time
+        && shortStr(request.resource.data.description, 2000)
+        && request.resource.data.generalLocation.keys().hasOnly(['label','lat','lng'])
+        && shortStr(request.resource.data.generalLocation.label, 200)
+        && request.resource.data.evidence.size() == 0
+        && request.resource.data.anonymous == getAfter(ownerDocPath(ref)).data.anonymous
+        && request.resource.data.status == 'saved'
+        && request.resource.data.agency == {'submitted': false, 'acknowledged': false}
+        && request.resource.data.createdAt == request.time;
+
+      // Reporter may only append evidence metadata while the report is still "saved".
+      allow update: if (signedIn() && exists(ownerDocPath(ref)) && get(ownerDocPath(ref)).data.uid == request.auth.uid
+          && resource.data.status == 'saved'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['evidence'])
+          && request.resource.data.evidence.size() <= 3)
+        // Reviewers may change status/note only. They cannot mark agency submission/acknowledgement:
+        // that must come from a real integration running on the backend.
+        || (isAdmin()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewerNote','reviewedAt'])
+          && request.resource.data.status in ['saved','under_review','closed']
+          && shortStr(request.resource.data.reviewerNote, 500));
+      allow delete: if false;
+    }
+
+    // ---------- Safety data: readable by signed-in users, written only by the backend ----------
+    match /safetySources/{id} { allow read: if signedIn(); allow write: if false; }
+    match /safetyRecords/{id} { allow read: if signedIn(); allow write: if false; }
+
+    // ---------- Audit log: admins append, admins read, nobody edits ----------
+    match /auditLogs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['actorUid','action','target','detail','createdAt'])
+        && request.resource.data.actorUid == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Everything else is closed by default.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
